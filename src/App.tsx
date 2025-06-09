@@ -17,6 +17,7 @@ import PatientLogin from "./pages/Auth/patient/patienLogin"; // use 'patienLogin
 import PatientRegister from "./pages/Auth/patient/patientRegister";
 import PatientHome from "./pages/Patient/PatientHome";
 import HealthForm from "./pages/Patient/HealthForm";
+import PatientProfile from "./pages/Patient/PatientProfile";
 
 const App: React.FC = () => {
   return (
@@ -38,6 +39,7 @@ const App: React.FC = () => {
         <Route path="/landing" element={<PatientLayout />}>
           <Route path="patientHome" element={<PatientHome />} />
           <Route path="patient/health-form" element={<HealthForm />} />
+          <Route path="patient/profile" element={<PatientProfile/>} />
         </Route>
       </Routes>
     </Router>
