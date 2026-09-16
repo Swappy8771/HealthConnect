@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { doctorRegister } from "../../../services/authService";
-import { Link } from "react-router-dom";
+import type { Clinic, Gender } from "../../../services/types";
+import { Link, useNavigate } from "react-router-dom";
 
 const DoctorRegister: React.FC = () => {
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
     phone: "",
-    gender: "",
+    gender: "" as Gender | "",
     dateOfBirth: "",
     password: "",
     education: [""],
@@ -16,7 +21,7 @@ const DoctorRegister: React.FC = () => {
     clinic: {
       name: "",
       address: "",
-      consultationType: "Both",
+      consultationType: "Both" as NonNullable<Clinic["consultationType"]>,
       consultationFee: ""
     },
     documents: {
@@ -65,20 +70,30 @@ const DoctorRegister: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    setNotice(null);
     try {
       await doctorRegister({
         ...form,
         experience: Number(form.experience),
+        // Drop blank education rows; the API rejects [""] and a blank fee must
+        // stay undefined rather than becoming a real 0 via Number("").
+        education: form.education.map((e) => e.trim()).filter(Boolean),
         clinic: {
           ...form.clinic,
-          consultationFee: Number(form.clinic.consultationFee)
-        }
+          consultationFee:
+            form.clinic.consultationFee === ""
+              ? undefined
+              : Number(form.clinic.consultationFee),
+        },
       });
-      alert("Doctor registered successfully!");
-      window.location.href = "/doctor/login";
-    } catch (error: any) {
-      alert(error.message || "Registration failed");
-      console.error(error);
+      setNotice("Registered. An administrator will review your application before you can log in.");
+      setTimeout(() => navigate("/doctor/login"), 1800);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -86,6 +101,13 @@ const DoctorRegister: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-lg space-y-4">
         <h2 className="text-2xl font-bold text-center text-blue-600">Doctor Registration</h2>
+
+        {error && (
+          <p className="rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+        )}
+        {notice && (
+          <p className="rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">{notice}</p>
+        )}
 
         <input name="fullName" placeholder="Full Name" value={form.fullName} onChange={handleChange} required className="w-full px-4 py-2 border rounded" />
         <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required className="w-full px-4 py-2 border rounded" />
@@ -136,7 +158,10 @@ const DoctorRegister: React.FC = () => {
         <input name="documents.license" placeholder="License Document URL" value={form.documents.license} onChange={handleChange} className="w-full px-4 py-2 border rounded" />
         <input name="documents.idProof" placeholder="ID Proof URL" value={form.documents.idProof} onChange={handleChange} className="w-full px-4 py-2 border rounded" />
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Register</button>
+        <button type="submit" disabled={submitting}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-60">
+          {submitting ? "Registering..." : "Register"}
+        </button>
 
         <p className="text-sm text-center">
           Already have an account?{" "}

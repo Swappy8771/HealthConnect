@@ -1,63 +1,36 @@
 import { API_ENDPOINTS } from "./config";
+import { request } from "./http";
+import type { Admin, Doctor, DoctorStatus } from "./types";
 
-// ✅ Admin Login
-export const loginAdmin = async (credentials: { email: string; password: string }) => {
-  const response = await fetch(API_ENDPOINTS.admin.login, {
+export type AdminLoginResponse = {
+  message: string;
+  token: string;
+  admin: Admin;
+};
+
+export const loginAdmin = (credentials: { email: string; password: string }) =>
+  request<AdminLoginResponse>(API_ENDPOINTS.admin.login, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials),
+    body: credentials,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to login");
-  }
+export const getAdminProfile = () =>
+  request<Admin>(API_ENDPOINTS.admin.me, { actor: "admin" });
 
-  return await response.json(); // Should include token and admin info
+/** Doctor applications. Pass a status to filter server-side. */
+export const fetchDoctorRequests = (status?: DoctorStatus) => {
+  const url = status
+    ? `${API_ENDPOINTS.admin.doctors}?status=${status}`
+    : API_ENDPOINTS.admin.doctors;
+  return request<Doctor[]>(url, { actor: "admin" });
 };
 
-// ✅ Fetch All Doctor Requests (Pending/All based on endpoint used)
-export const fetchDoctorRequests = async () => {
-  const token = localStorage.getItem("adminToken");
-  if (!token) throw new Error("Admin token missing");
-
-  const response = await fetch(API_ENDPOINTS.admin.doctors, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch doctor requests");
-  }
-
-  return await response.json();
-};
-
-// ✅ Approve/Reject Doctor Status
-export const updateDoctorStatus = async (
+export const updateDoctorStatus = (
   doctorId: string,
-  status: "approved" | "rejected",
+  status: DoctorStatus,
   adminRemarks: string = ""
-) => {
-  const token = localStorage.getItem("adminToken");
-  if (!token) throw new Error("Admin token missing");
-
-  const response = await fetch(`${API_ENDPOINTS.admin.doctors}/${doctorId}/status`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify({ status, adminRemarks }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update doctor status");
-  }
-
-  return await response.json();
-};
+) =>
+  request<{ message: string; doctor: Doctor }>(
+    `${API_ENDPOINTS.admin.doctors}/${doctorId}/status`,
+    { method: "PATCH", body: { status, adminRemarks }, actor: "admin" }
+  );

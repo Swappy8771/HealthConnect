@@ -18,9 +18,12 @@ const AdminLogin: React.FC = () => {
     try {
       const res = await loginAdmin(form);
       localStorage.setItem("adminToken", res.token);
+      // Role and name were returned and thrown away, so the UI could not vary
+      // by role even though the data was in hand.
+      localStorage.setItem("admin", JSON.stringify(res.admin));
       navigate("/admin/dashboard"); // redirect to admin route
-    } catch (err: any) {
-      setError(err.message || "Login failed. Try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed. Try again.");
     }
   };
 

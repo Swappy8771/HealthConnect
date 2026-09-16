@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { patientRegister } from "../../../services/authService";
+import type { Gender } from "../../../services/types";
 
 interface PatientForm {
   fullName: string;
   email: string;
   password: string;
-  gender: string;
+  gender: Gender | "";
   phone: string;
 }
 
 const PatientRegister: React.FC = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [form, setForm] = useState<PatientForm>({
     fullName: "",
     email: "",
@@ -30,10 +33,10 @@ const PatientRegister: React.FC = () => {
     e.preventDefault();
     try {
       await patientRegister(form);
-      alert("Registration successful!");
-      navigate("/patient/login");
-    } catch (error: any) {
-      alert(error.message || "Something went wrong");
+      setNotice("Account created. Please log in.");
+      setTimeout(() => navigate("/patient/login", { replace: true }), 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -48,12 +51,7 @@ const PatientRegister: React.FC = () => {
           Easily register and start booking appointments, uploading health forms,
           and managing your patient profile from one central place.
         </p>
-        <img
-          src="https://cdn.dribbble.com/users/1583540/screenshots/20409248/media/1234567890abcdef1234567890abcdef.jpg"
-          alt="Illustration"
-          className="mt-10 max-w-sm rounded-xl shadow-lg"
-        />
-      </div>
+        </div>
 
       {/* Right Side Form */}
       <div className="md:w-1/2 w-full flex items-center justify-center p-6">
@@ -64,6 +62,13 @@ const PatientRegister: React.FC = () => {
           <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">
             Create Your Account
           </h2>
+
+          {error && (
+            <p className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+          )}
+          {notice && (
+            <p className="mb-4 rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">{notice}</p>
+          )}
 
           <div className="space-y-4">
             <input

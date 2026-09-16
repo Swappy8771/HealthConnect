@@ -1,5 +1,6 @@
 import * as React from "react";
+import { cn } from "../../lib/cn";
 
 export const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => (
-  <div className={`animate-pulse bg-gray-200 rounded-md ${className}`} />
+  <div className={cn("animate-pulse bg-gray-200 rounded-md", className)} />
 );

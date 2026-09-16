@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <div className="text-2xl font-bold text-blue-600 cursor-pointer" onClick={() => navigate("/")}>
           <span className="flex items-center gap-2">
-            <span className="text-3xl">⚕️</span> HealthConnect
+            <span className="text-3xl">⚕️</span> CureSync
           </span>
         </div>
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 // Layouts
@@ -23,20 +23,27 @@ import DoctorRegister from "./pages/Auth/doctor/doctorRegister";
 // Patient Auth & Dashboard
 import PatientLogin from "./pages/Auth/patient/patienLogin";
 import PatientRegister from "./pages/Auth/patient/patientRegister";
-import PatientHome from "./pages/Patient/PatientHome";
-import HealthForm from "./pages/Patient/HealthForm";
-import PatientProfile from "./pages/Patient/PatientProfile";
-import DoctorsList from "./pages/Auth/patient/DoctorList";
 
 // Admin Auth & Pages
 import AdminLogin from "./pages/Admin/AdminLogin";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
-import AdminDoctorApproval from "./pages/Doctor/AdminDoctorApproval";
-import DoctorHome from "./pages/Doctor/DoctorHome";
+
+
+// Dashboard pages are loaded on demand — they are behind a login and were
+// previously all in the initial bundle.
+const PatientHome = lazy(() => import("./pages/Patient/PatientHome"));
+const HealthForm = lazy(() => import("./pages/Patient/HealthForm"));
+const PatientProfile = lazy(() => import("./pages/Patient/PatientProfile"));
+const DoctorsList = lazy(() => import("./pages/Auth/patient/DoctorList"));
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const AdminDoctorApproval = lazy(() => import("./pages/Doctor/AdminDoctorApproval"));
+const DoctorHome = lazy(() => import("./pages/Doctor/DoctorHome"));
 
 const App: React.FC = () => {
   return (
     <Router>
+      <Suspense
+        fallback={<div className="p-10 text-center text-gray-500">Loading...</div>}
+      >
       <Routes>
         {/* Public Landing */}
         <Route path="/" element={<HomePage />} />
@@ -84,6 +91,7 @@ const App: React.FC = () => {
         {/* Unknown URL: send people somewhere real instead of a blank page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </Router>
   );
 };

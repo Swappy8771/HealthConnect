@@ -5,6 +5,7 @@ import { patientLogin } from "../../../services/authService";
 const PatientLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -13,10 +14,12 @@ const PatientLogin = () => {
     try {
       const result = await patientLogin({ email, password });
       localStorage.setItem("token", result.token);
-      alert("Login successful!");
-      navigate("/landing/patientHome");
-    } catch (error: any) {
-      alert(error.message || "Login failed");
+      // The server already returns the patient summary; keeping it saves an
+      // extra /me request just to greet them by name.
+      localStorage.setItem("patient", JSON.stringify(result.patient));
+      navigate("/landing/patientHome", { replace: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
     }
   };
 
@@ -28,12 +31,7 @@ const PatientLogin = () => {
         <p className="text-gray-700 text-lg">
           Login to access your personalized patient dashboard and manage your health efficiently.
         </p>
-        <img
-          src="https://cdn.dribbble.com/users/1583540/screenshots/20409248/media/1234567890abcdef1234567890abcdef.jpg"
-          alt="Illustration"
-          className="mt-10 max-w-sm rounded-xl shadow-lg"
-        />
-      </div>
+        </div>
 
       {/* Login Form */}
       <div className="md:w-1/2 flex items-center justify-center px-6 py-12">
@@ -41,6 +39,10 @@ const PatientLogin = () => {
           <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
             Patient Login
           </h2>
+
+          {error && (
+            <p className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>

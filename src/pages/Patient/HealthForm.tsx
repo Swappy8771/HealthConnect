@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { getHealthForm, updateHealthForm } from "../../services/patientService";
+import type { HealthForm as HealthFormData } from "../../services/types";
+import { Button } from "../../components/ui/Button";
 
 // Only fields that GET /api/patient/healthform returns and PUT accepts.
 // fullName, gender and phone are account fields — they live on the profile
 // page. They used to appear here and only saved because of a mass-assignment
 // bug in the controller; they never loaded back.
-const defaultForm = {
+type FormState = Record<keyof HealthFormData, string>;
+
+const defaultForm: FormState = {
   age: "",
   bloodGroup: "",
   emergencyContactName: "",
@@ -21,10 +25,13 @@ const defaultForm = {
 };
 
 const HealthForm: React.FC = () => {
-  const [form, setForm] = useState(defaultForm);
-  const [originalForm, setOriginalForm] = useState(defaultForm);
+  const [form, setForm] = useState<FormState>(defaultForm);
+  const [originalForm, setOriginalForm] = useState<FormState>(defaultForm);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,14 +40,14 @@ const HealthForm: React.FC = () => {
         // Keep only known fields, and never feed null/undefined into a
         // controlled input (React would switch it to uncontrolled).
         const loaded = { ...defaultForm };
-        (Object.keys(defaultForm) as (keyof typeof defaultForm)[]).forEach((key) => {
-          if (data?.[key] !== null && data?.[key] !== undefined) loaded[key] = data[key];
+        (Object.keys(defaultForm) as (keyof FormState)[]).forEach((key) => {
+          const value = data?.[key];
+          if (value !== null && value !== undefined) loaded[key] = String(value);
         });
         setForm(loaded);
         setOriginalForm(loaded);
       } catch (err) {
-        console.error("Error fetching form:", err);
-        alert(err instanceof Error ? err.message : "Could not load your health form");
+        setError(err instanceof Error ? err.message : "Could not load your health form");
       } finally {
         setLoading(false);
       }
@@ -61,13 +68,30 @@ const HealthForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
+    setError(null);
+    setNotice(null);
+
+    // Numbers must go over as numbers; blanks are omitted rather than sent as
+    // empty strings, which Mongoose would reject when casting to Number.
+    const payload: HealthFormData = {
+      ...(form as unknown as HealthFormData),
+      age: form.age === "" ? undefined : Number(form.age),
+      sleepHours: form.sleepHours === "" ? undefined : Number(form.sleepHours),
+      smoking: form.smoking as "Yes" | "No",
+      alcohol: form.alcohol as "Yes" | "No",
+      activityLevel: form.activityLevel as "Low" | "Moderate" | "High",
+    };
+
     try {
-      await updateHealthForm(form);
-      alert("Health form updated successfully");
+      await updateHealthForm(payload);
+      setNotice("Health form updated.");
       setOriginalForm(form);
       setEditMode(false);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update health form");
+      setError(err instanceof Error ? err.message : "Failed to update health form");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -76,9 +100,16 @@ const HealthForm: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
       <h2 className="text-2xl font-semibold mb-4 text-blue-600">Health Form</h2>
+
+      {error && (
+        <p className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>
+      )}
+      {notice && (
+        <p className="mb-4 rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">{notice}</p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input name="age" type="number" value={form.age} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Age" />
+          <input name="age" type="number" min={0} max={120} value={form.age} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Age" />
           <input name="bloodGroup" value={form.bloodGroup} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Blood Group" />
           <input name="emergencyContactName" value={form.emergencyContactName} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Emergency Contact Name" />
           <input name="emergencyContactPhone" value={form.emergencyContactPhone} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Emergency Contact Phone" />
@@ -110,18 +141,18 @@ const HealthForm: React.FC = () => {
           </div>
           <div>
             <label className="block text-sm">Sleep Hours</label>
-            <input type="number" name="sleepHours" value={form.sleepHours} disabled={!editMode} onChange={handleChange} className="w-full border px-4 py-2 rounded" />
+            <input type="number" name="sleepHours" min={0} max={24} step={0.5} value={form.sleepHours} disabled={!editMode} onChange={handleChange} className="w-full border px-4 py-2 rounded" />
           </div>
         </div>
 
         <div className="flex justify-end gap-4 mt-6">
           {editMode ? (
             <>
-              <button type="button" onClick={handleCancel} className="border px-4 py-2 rounded hover:bg-gray-100">Cancel</button>
-              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+              <Button type="button" variant="secondary" onClick={handleCancel} disabled={saving}>Cancel</Button>
+              <Button type="submit" loading={saving}>Save</Button>
             </>
           ) : (
-            <button type="button" onClick={() => setEditMode(true)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Edit</button>
+            <Button type="button" onClick={() => setEditMode(true)}>Edit</Button>
           )}
         </div>
       </form>

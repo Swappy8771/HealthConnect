@@ -1,87 +1,31 @@
-// src/services/patientProfileService.ts
-
 import { API_ENDPOINTS } from "./config";
+import { request } from "./http";
+import type { HealthForm, PatientProfile } from "./types";
 
-const headers = {
-  "Content-Type": "application/json",
-};
+// ✅ Profile
+export const getPatientProfile = () =>
+  request<PatientProfile>(API_ENDPOINTS.patient.profile, { actor: "patient" });
 
-const getToken = () => localStorage.getItem("token");
-
-const handleResponse = async (response: Response) => {
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
-  }
-  return data;
-};
-
-// ✅ Get patient profile
-export const getPatientProfile = async () => {
-  const token = getToken();
-  const response = await fetch(API_ENDPOINTS.patient.profile, {
-    method: "GET",
-    headers: {
-      ...headers,
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return handleResponse(response);
-};
-
-// ✏️ Update patient profile
-export const updatePatientProfile = async (data: any) => {
-  const token = getToken();
-  const response = await fetch(API_ENDPOINTS.patient.profile, {
+export const updatePatientProfile = (data: Partial<PatientProfile>) =>
+  request<PatientProfile>(API_ENDPOINTS.patient.profile, {
     method: "PUT",
-    headers: {
-      ...headers,
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
+    body: data,
+    actor: "patient",
   });
-  return handleResponse(response);
-};
 
-// ❌ Delete patient profile
-export const deletePatientProfile = async () => {
-  const token = getToken();
-  const response = await fetch(API_ENDPOINTS.patient.profile, {
+export const deletePatientProfile = () =>
+  request<{ message: string }>(API_ENDPOINTS.patient.profile, {
     method: "DELETE",
-    headers: {
-      ...headers,
-      Authorization: `Bearer ${token}`,
-    },
+    actor: "patient",
   });
-  return handleResponse(response);
-};
 
+// 🩺 Health form
+export const getHealthForm = () =>
+  request<HealthForm>(API_ENDPOINTS.patient.healthform, { actor: "patient" });
 
-
-
-//Health Form
-
-export const getHealthForm = async () => {
-  const token = getToken();
-  const response = await fetch(API_ENDPOINTS.patient.healthform, {
-    headers: {
-      ...headers,
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return handleResponse(response);
-};
-
-// ✏️ Update health form
-export const updateHealthForm = async (formData: any) => {
-  const token = getToken();
-  const response = await fetch(API_ENDPOINTS.patient.healthform, {
+export const updateHealthForm = (formData: HealthForm) =>
+  request<HealthForm>(API_ENDPOINTS.patient.healthform, {
     method: "PUT",
-    headers: {
-      ...headers,
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(formData),
+    body: formData,
+    actor: "patient",
   });
-  return handleResponse(response);
-};

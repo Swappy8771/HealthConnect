@@ -2,20 +2,14 @@ import React from "react";
 
 const DoctorHome: React.FC = () => {
   return (
-    <div style={styles.container}>
-      <h1>Welcome to the Doctor Home Page</h1>
-      <p>This is a placeholder for Doctor-specific content after login.</p>
+    <div className="rounded-lg bg-white p-6 shadow-md">
+      <h1 className="text-2xl font-semibold text-gray-800">Welcome</h1>
+      <p className="mt-2 text-gray-600">
+        Your account is approved. Appointments and patient records are not built
+        yet — this dashboard will fill in as those features land.
+      </p>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: "2rem",
-    textAlign: "center" as const,
-    backgroundColor: "#f4f4f4",
-    minHeight: "100vh",
-  },
 };
 
 export default DoctorHome;
