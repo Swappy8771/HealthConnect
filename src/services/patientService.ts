@@ -55,3 +55,34 @@ export const deletePatientProfile = async () => {
   });
   return handleResponse(response);
 };
+
+
+
+
+//Health Form
+
+export const getHealthForm = async () => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(API_ENDPOINTS.patient.healthform, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return await response.json();
+};
+
+// ✏️ Update health form
+export const updateHealthForm = async (formData: any) => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(API_ENDPOINTS.patient.healthform, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(formData),
+  });
+  if (!response.ok) throw new Error("Update failed");
+  return await response.json();
+};
