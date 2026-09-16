@@ -43,8 +43,10 @@ const patientAuthRoutes = require('./routes/patientAuth');
 const patientProfileRoutes = require('./routes/patient/PatientProfile');
 const patientHealthFormRoutes = require('./routes/patient/PatientHealthForm');
 const doctorListingRoutes = require('./routes/patient/doctorListing');
+const patientAppointmentRoutes = require('./routes/patient/appointments');
 
 const doctorAuthRoutes = require('./routes/doctorAuth');
+const doctorAppointmentRoutes = require('./routes/doctor/appointments');
 // const doctorProfileRoutes = require('./routes/doctor/DoctorProfile'); // optional
 
 const adminAuthRoutes = require('./routes/adminAuth');
@@ -62,9 +64,11 @@ app.use('/api/patient', patientAuthRoutes);
 app.use('/api/patient', patientProfileRoutes);
 app.use('/api/patient/healthform', patientHealthFormRoutes);
 app.use('/api/patient', doctorListingRoutes);
+app.use('/api/patient', patientAppointmentRoutes);
 
 // Doctor routes
 app.use('/api/doctor', doctorAuthRoutes);
+app.use('/api/doctor', doctorAppointmentRoutes);
 // app.use('/api/doctor/profile', doctorProfileRoutes); // optional
 
 // Admin routes

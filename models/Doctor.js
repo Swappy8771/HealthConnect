@@ -49,6 +49,18 @@ const doctorSchema = new mongoose.Schema({
     idProof: { type: String }
   },
 
+  // Weekly recurring availability. Times are "HH:MM" wall clock, interpreted
+  // as UTC for now (see the note on the Appointment model).
+  availability: [{
+    _id: false,
+    dayOfWeek: { type: Number, min: 0, max: 6, required: true }, // 0 = Sunday
+    startTime: { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    endTime:   { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+  }],
+
+  // Length of one consultation slot, in minutes.
+  slotMinutes: { type: Number, min: 5, max: 240, default: 30 },
+
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],

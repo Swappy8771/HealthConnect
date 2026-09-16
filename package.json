@@ -7,7 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "lint": "eslint .",
-    "seed:admin": "node seedAdmin.js"
+    "seed:admin": "node seedAdmin.js",
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js"
   },
   "author": "",
   "license": "ISC",

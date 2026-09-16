@@ -74,3 +74,36 @@ controllers/      handlers with real logic (thin queries stay inline)
 
 The full architecture notes, module guides and the outstanding-issues audit
 live in `~/Desktop/Personal/knowledge/clinic-booking/`.
+
+## Tests
+
+```bash
+npm test          # node --test tests/*.test.js
+```
+
+Requires a MongoDB the tests can write to. They create a uniquely-named
+database per run and drop it afterwards, so an existing local instance is
+fine:
+
+```bash
+TEST_MONGO_URI=mongodb://127.0.0.1:27017/clinic_test npm test
+```
+
+Defaults to `mongodb://127.0.0.1:27017/clinic_test_<pid>_<timestamp>`.
+
+| File | Covers |
+|---|---|
+| `tests/slots.test.js` | Slot generation — pure, no database |
+| `tests/appointments.test.js` | Booking rules at the model layer, including concurrency |
+| `tests/booking-api.test.js` | The booking endpoints over HTTP |
+
+Fixtures are created directly through the models and tokens are signed with
+`tokenFor()`, rather than going through register and login — those routes are
+rate limited on purpose, and driving them in setup would exhaust the limiter
+and fail tests for an unrelated reason.
+
+**The test that matters most** is "50 simultaneous bookings for one slot
+produce exactly one appointment". Double-booking is prevented by a partial
+unique index on `(doctor, startsAt)` where `status: 'booked'` — not by checking
+whether a slot is free and then inserting, which is a race. The partial filter
+is what lets a cancelled appointment genuinely free its slot.
