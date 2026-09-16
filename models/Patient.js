@@ -2,10 +2,11 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { emailField } = require('./validators');
 
 const patientSchema = new mongoose.Schema({
   fullName: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true },
+  email: emailField(),
   phone: { type: String, required: true },
   gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
   password: { type: String, required: true },

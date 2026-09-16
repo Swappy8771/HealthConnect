@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 const { JWT_SECRET } = require('../config/env');
 const { loginLimiter } = require('../middlewares/rateLimit');
+const { verifyAdmin } = require('../middlewares/auth');
 
 // POST /api/admin/login
 router.post('/login', loginLimiter, async (req, res) => {
@@ -51,6 +52,12 @@ router.post('/login', loginLimiter, async (req, res) => {
     console.error('Admin login error:', error.message);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
+});
+
+// GET /api/admin/me — the logged-in admin. verifyAdmin already loaded and
+// status-checked the document.
+router.get('/me', verifyAdmin, (req, res) => {
+  res.status(200).json(req.admin);
 });
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { emailField } = require('./validators');
 
 const adminSchema = new mongoose.Schema(
   {
@@ -9,19 +10,14 @@ const adminSchema = new mongoose.Schema(
       trim: true,
     },
 
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-      match: [/.+\@.+\..+/, 'Please fill a valid email address'],
-    },
+    email: emailField(),
 
+    // No minlength here: the schema only ever sees the bcrypt hash, which is
+    // always 60 characters, so the rule would always pass. Plaintext length is
+    // checked by validatePassword() before the value is assigned.
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: 6,
     },
 
     role: {

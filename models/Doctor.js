@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { emailField } = require('./validators');
 
 const doctorSchema = new mongoose.Schema({
   fullName: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true },
+  email: emailField(),
   phone: { type: String, required: true },
   gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
   dateOfBirth: { type: Date },
@@ -51,8 +52,15 @@ const doctorSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
+    default: 'pending',
+    // Both the admin queue and the patient listing filter on this.
+    index: true
   },
+
+  // Who last changed `status`, and when. Approval is a compliance-sensitive
+  // action and `updatedAt` alone does not say who acted.
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+  reviewedAt: { type: Date },
 
   adminRemarks: { type: String }
 

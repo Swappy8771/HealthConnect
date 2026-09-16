@@ -18,17 +18,31 @@ const pick = (source, allowed) =>
     return out;
   }, {});
 
+// Account fields returned by GET /me. The health fields live on the same
+// document but belong to the health-form endpoint, so this no longer dumps a
+// patient's entire medical record on every profile load.
+const PROFILE_FIELDS = [
+  '_id',
+  'fullName',
+  'email',
+  'phone',
+  'gender',
+  'dateOfBirth',
+  'profileImage',
+  'createdAt',
+];
+
 // @desc Get logged-in patient profile
-const getProfile = async (req, res) => {
+const getProfile = async (req, res, next) => {
   try {
-    res.json(req.patient); 
+    res.json(pick(req.patient.toObject(), PROFILE_FIELDS));
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    next(err);
   }
 };
 
 // @desc Update logged-in patient profile
-const updateProfile = async (req, res) => {
+const updateProfile = async (req, res, next) => {
   try {
     const updates = pick(req.body, UPDATABLE_FIELDS);
 
@@ -38,9 +52,9 @@ const updateProfile = async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
 
-    res.json(updatedPatient);
+    res.json(pick(updatedPatient.toObject(), PROFILE_FIELDS));
   } catch (err) {
-    res.status(500).json({ message: 'Update failed', error: err.message });
+    next(err);
   }
 };
 

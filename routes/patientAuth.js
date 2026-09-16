@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const Patient = require('../models/Patient');
 const { JWT_SECRET } = require('../config/env');
 const { loginLimiter, registerLimiter } = require('../middlewares/rateLimit');
+const { validatePassword } = require('../models/validators');
 
 // POST /api/patient/signup
 router.post('/register', registerLimiter, async (req, res) => {
@@ -12,6 +13,11 @@ router.post('/register', registerLimiter, async (req, res) => {
 
   if (!fullName || !email || !phone || !gender || !password ) {
     return res.status(400).json({ message: 'Please provide all required fields.' });
+  }
+
+  const weakPassword = validatePassword(password);
+  if (weakPassword) {
+    return res.status(400).json({ message: weakPassword });
   }
 
   try {

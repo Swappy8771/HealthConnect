@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
 const { JWT_SECRET } = require('../config/env');
 const { loginLimiter, registerLimiter } = require('../middlewares/rateLimit');
+const { validatePassword } = require('../models/validators');
 
 // Doctor Registration
 router.post('/register', registerLimiter, async (req, res) => {
@@ -39,6 +40,21 @@ router.post('/register', registerLimiter, async (req, res) => {
     });
   }
 
+  const weakPassword = validatePassword(password);
+  if (weakPassword) {
+    return res.status(400).json({ message: weakPassword });
+  }
+
+  // A blank education row arrives as [""], which passes a presence check but
+  // fails the schema's per-element `required` with an opaque 500.
+  const cleanedEducation = Array.isArray(education)
+    ? education.map((e) => String(e).trim()).filter(Boolean)
+    : education;
+
+  if (Array.isArray(cleanedEducation) && cleanedEducation.length === 0) {
+    return res.status(400).json({ message: 'Please provide at least one education entry.' });
+  }
+
   try {
     const existingDoctor = await Doctor.findOne({ email });
     if (existingDoctor) {
@@ -55,7 +71,7 @@ router.post('/register', registerLimiter, async (req, res) => {
       specialization,
       ...(category ? { category } : {}),
       experience,
-      education,
+      education: cleanedEducation,
       clinic,
       documents,
       status: 'pending'  // Important for admin approval logic

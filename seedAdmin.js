@@ -15,8 +15,7 @@ const mongoose = require('mongoose');
 require('./config/env');
 const connectDB = require('./config/db');
 const Admin = require('./models/Admin');
-
-const MIN_PASSWORD_LENGTH = 12;
+const { validatePassword } = require('./models/validators');
 
 const generatePassword = () =>
   crypto.randomBytes(18).toString('base64url').slice(0, 24);
@@ -32,9 +31,12 @@ const seedAdmin = async () => {
   }
 
   const providedPassword = process.env.ADMIN_PASSWORD;
-  if (providedPassword && providedPassword.length < MIN_PASSWORD_LENGTH) {
-    console.error(`❌ ADMIN_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters.`);
-    process.exit(1);
+  if (providedPassword) {
+    const problem = validatePassword(providedPassword);
+    if (problem) {
+      console.error(`❌ ADMIN_PASSWORD rejected: ${problem}`);
+      process.exit(1);
+    }
   }
 
   const password = providedPassword || generatePassword();
