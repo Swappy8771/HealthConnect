@@ -5,6 +5,7 @@ import DashboardShell, { type NavItem } from "./DashboardShell";
 const navItems: NavItem[] = [
   { label: "Home", icon: "🏠", path: "/landing/patientHome" },
   { label: "Find Doctors", icon: "🩺", path: "/landing/patient/doctors" },
+  { label: "Appointments", icon: "📅", path: "/landing/patient/appointments" },
   { label: "Health Form", icon: "📋", path: "/landing/patient/health-form" },
   { label: "My Profile", icon: "👤", path: "/landing/patient/profile" },
 ];

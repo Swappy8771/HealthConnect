@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "../../../components/ui/Card";
 import { Avatar, AvatarFallback } from "../../../components/ui/Avatar";
 import { getDoctorListings } from "../../../services/doctorListingService";
@@ -108,6 +109,12 @@ const DoctorsList: React.FC = () => {
             {doc.clinic?.consultationFee !== undefined && (
               <p className="text-sm text-gray-600">Fee: ₹{doc.clinic.consultationFee}</p>
             )}
+            <Link
+              to={`/landing/patient/doctors/${doc._id}/book`}
+              className="mt-4 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+            >
+              Book appointment
+            </Link>
           </CardContent>
         </Card>
       ))}

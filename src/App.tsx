@@ -37,6 +37,10 @@ const DoctorsList = lazy(() => import("./pages/Auth/patient/DoctorList"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminDoctorApproval = lazy(() => import("./pages/Doctor/AdminDoctorApproval"));
 const DoctorHome = lazy(() => import("./pages/Doctor/DoctorHome"));
+const DoctorAvailability = lazy(() => import("./pages/Doctor/DoctorAvailability"));
+const DoctorAppointments = lazy(() => import("./pages/Doctor/DoctorAppointments"));
+const BookAppointment = lazy(() => import("./pages/Patient/BookAppointment"));
+const MyAppointments = lazy(() => import("./pages/Patient/MyAppointments"));
 
 const App: React.FC = () => {
   return (
@@ -56,6 +60,8 @@ const App: React.FC = () => {
         <Route element={<ProtectedRoute tokenKey="doctorToken" loginPath="/doctor/login" />}>
         <Route path="/doctor" element={<DoctorLayout />}>
          <Route path="dashboard" element={<DoctorHome />} />
+         <Route path="availability" element={<DoctorAvailability />} />
+         <Route path="appointments" element={<DoctorAppointments />} />
         
           {/* <Route path="dashboard" element={<DoctorDashboard />} />
           <Route path="appointments" element={<DoctorAppointments />} />
@@ -76,6 +82,8 @@ const App: React.FC = () => {
           <Route path="patient/health-form" element={<HealthForm />} />
           <Route path="patient/profile" element={<PatientProfile />} />
           <Route path="patient/doctors" element={<DoctorsList />} />
+          <Route path="patient/doctors/:doctorId/book" element={<BookAppointment />} />
+          <Route path="patient/appointments" element={<MyAppointments />} />
         </Route>
         </Route>
 
