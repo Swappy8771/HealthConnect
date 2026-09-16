@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 // Loads and validates .env — exits if MONGO_URI or JWT_SECRET is missing
-const { PORT } = require('./config/env');
+const { PORT, ALLOWED_ORIGINS } = require('./config/env');
 const connectDB = require('./config/db');
 
 // Connect to DB
@@ -12,7 +12,15 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+// Only the configured origins may call the API. Requests with no Origin header
+// (curl, server-to-server, health checks) are allowed through.
+app.use(cors({
+  origin: (origin, callback) => {
+    // Deny by omitting the CORS header rather than raising — an error here
+    // would surface as a 500 with a stack trace instead of a clean block.
+    callback(null, !origin || ALLOWED_ORIGINS.includes(origin));
+  },
+}));
 app.use(express.json());
 
 // Root test route
@@ -38,6 +46,7 @@ const adminDoctorRoutes = require('./routes/admin/doctorRequests'); // ✅ admin
 app.use('/api/patient', patientAuthRoutes);
 app.use('/api/patient', patientProfileRoutes);
 app.use('/api/patient/healthform', patientHealthFormRoutes);
+app.use('/api/patient', doctorListingRoutes);
 
 // Doctor routes
 app.use('/api/doctor', doctorAuthRoutes);

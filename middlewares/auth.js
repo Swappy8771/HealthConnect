@@ -80,6 +80,21 @@ const verifyAdmin = async (req, res, next) => {
   }
 };
 
+// Middleware: require an approved doctor.
+//
+// `status` is checked at login, but a token lives for a day — so a doctor
+// rejected mid-session keeps a valid token. Chain this after verifyDoctor on
+// every route that does real doctor work.
+const requireApprovedDoctor = (req, res, next) => {
+  if (!req.doctor || req.doctor.status !== 'approved') {
+    return res.status(403).json({
+      message: 'Your account is not approved',
+      status: req.doctor ? req.doctor.status : 'unknown',
+    });
+  }
+  next();
+};
+
 // Optional: Role-based access control for Admins
 const allowAdminRoles = (...allowedRoles) => {
   return (req, res, next) => {
@@ -94,5 +109,6 @@ module.exports = {
   verifyPatient,
   verifyDoctor,
   verifyAdmin,
+  requireApprovedDoctor,
   allowAdminRoles,
 };

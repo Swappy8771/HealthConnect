@@ -18,8 +18,15 @@ if (missing.length) {
   process.exit(1);
 }
 
+// Comma-separated list of browser origins allowed to call the API.
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 module.exports = {
   PORT: process.env.PORT || 5000,
+  ALLOWED_ORIGINS,
   MONGO_URI: process.env.MONGO_URI,
   JWT_SECRET: process.env.JWT_SECRET,
 };

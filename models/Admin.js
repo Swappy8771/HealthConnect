@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const adminSchema = new mongoose.Schema(
   {
@@ -37,5 +38,16 @@ const adminSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+// Hash the password whenever it is set or changed. This is the single place
+// hashing happens — routes assign the plaintext and save. Note that
+// findByIdAndUpdate does NOT run this hook, which is why `password` is excluded
+// from every update whitelist.
+adminSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
 module.exports = mongoose.model('Admin', adminSchema);

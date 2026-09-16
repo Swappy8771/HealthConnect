@@ -4,9 +4,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/Patient');
 const { JWT_SECRET } = require('../config/env');
+const { loginLimiter, registerLimiter } = require('../middlewares/rateLimit');
 
 // POST /api/patient/signup
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   const { fullName, email,phone, gender, password } = req.body;
 
   if (!fullName || !email || !phone || !gender || !password ) {
@@ -19,15 +20,13 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // The password is hashed by the pre('save') hook on the model.
     const newPatient = new Patient({
       fullName,
       email,
        phone,
       gender,
-      password: hashedPassword,
-     
+      password,
     });
 
     await newPatient.save();
@@ -40,7 +39,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/patient/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   try {

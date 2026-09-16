@@ -4,9 +4,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
 const { JWT_SECRET } = require('../config/env');
+const { loginLimiter, registerLimiter } = require('../middlewares/rateLimit');
 
 // Doctor Registration
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   const {
     fullName,
     email,
@@ -14,6 +15,7 @@ router.post('/register', async (req, res) => {
     password,
     phone,
     specialization,
+    category,
     experience,
     education,
     clinic,
@@ -43,15 +45,15 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // The password is hashed by the pre('save') hook on the model.
     const doctor = new Doctor({
       fullName,
       email,
       gender,
-      password: hashedPassword,
+      password,
       phone,
       specialization,
+      ...(category ? { category } : {}),
       experience,
       education,
       clinic,
@@ -68,7 +70,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Doctor Login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -79,7 +81,18 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
     if (doctor.status !== 'approved') {
-      return res.status(403).json({ message: 'Your account is pending or suspended by admin' });
+      // Say which it is — 'pending' and 'rejected' need different actions from
+      // the doctor, and an opaque message leaves them waiting forever.
+      const message =
+        doctor.status === 'rejected'
+          ? 'Your application was not approved. Please contact the clinic administrator.'
+          : 'Your account is awaiting admin approval. You will be able to log in once it is reviewed.';
+
+      return res.status(403).json({
+        message,
+        status: doctor.status,
+        ...(doctor.adminRemarks ? { adminRemarks: doctor.adminRemarks } : {}),
+      });
     }
 
     const token = jwt.sign(
