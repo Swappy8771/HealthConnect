@@ -4,7 +4,7 @@ import doctorImage from "../../assets/Untitled design.png";
 
 const Hero: React.FC = () => {
   return (
-    <section className="bg-blue-50 py-16 px-4 md:px-8 lg:px-20">
+    <section id="home" className="bg-blue-50 py-16 px-4 md:px-8 lg:px-20">
       <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-7xl mx-auto">
         {/* Left Content */}
         <div className="md:w-1/2 mt-10 md:mt-0">

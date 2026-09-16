@@ -1,17 +1,33 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { doctorLogin } from "../../../services/authService"; // adjust path as needed
 
 const DoctorLogin: React.FC = () => {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // handle login logic
-    console.log(form);
+    setError("");
+
+    try {
+      const res = await doctorLogin(form); // send API request
+      if (res?.token) {
+        localStorage.setItem("doctorToken", res.token); // or res.data.token
+        navigate("/doctor/dashboard"); // redirect after login
+      } else {
+        setError("Invalid email or password");
+      }
+    } catch (err) {
+      // The client throws an ApiError carrying the server's message — including
+      // "awaiting admin approval", which the doctor needs to see.
+      setError(err instanceof Error ? err.message : "Login failed");
+    }
   };
 
   return (
@@ -23,6 +39,10 @@ const DoctorLogin: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
           Doctor Login
         </h2>
+
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+        )}
 
         <div className="space-y-4">
           <input

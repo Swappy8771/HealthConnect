@@ -10,7 +10,7 @@ const TrustedBy: React.FC = () => {
   const logos = [logo1, logo2, logo3, logo4, logo5];
 
   return (
-    <section className="bg-white py-12 px-4 md:px-8 lg:px-20">
+    <section id="doctors" className="bg-white py-12 px-4 md:px-8 lg:px-20">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-xl text-blue-600 font-semibold mb-2">Trusted By</h2>
         <p className="text-gray-700 text-lg mb-8">

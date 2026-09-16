@@ -5,7 +5,7 @@ import { FaSearch, FaCalendarCheck, FaComments } from "react-icons/fa";
 
 const HowItWorks: React.FC = () => {
   return (
-    <section className="bg-white py-16 px-4 md:px-8 lg:px-20">
+    <section id="how-it-works" className="bg-white py-16 px-4 md:px-8 lg:px-20">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
         <p className="text-gray-600 mb-12">Book your medical appointment in 3 simple steps</p>

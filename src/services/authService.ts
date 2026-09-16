@@ -1,73 +1,70 @@
 import { API_ENDPOINTS } from "./config";
+import { request } from "./http";
+import type { Doctor, Gender, PatientProfile } from "./types";
 
-const headers = {
-  "Content-Type": "application/json",
+export type LoginCredentials = { email: string; password: string };
+
+export type PatientLoginResponse = {
+  message: string;
+  token: string;
+  patient: Pick<PatientProfile, "fullName" | "email" | "gender"> & { id: string };
 };
 
-const handleResponse = async (response: Response) => {
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || "Something went wrong");
-  }
-  return data;
+export type DoctorLoginResponse = {
+  message: string;
+  token: string;
+  doctor: { id: string; name: string; specialization: string };
 };
 
-// 🧑‍⚕️ Doctor Auth
-export const doctorLogin = async (credentials: {
-  email: string;
-  password: string;
-}) => {
-  const response = await fetch(API_ENDPOINTS.doctor.login, {
+// 🧑‍⚕️ Doctor
+export const doctorLogin = (credentials: LoginCredentials) =>
+  request<DoctorLoginResponse>(API_ENDPOINTS.doctor.login, {
     method: "POST",
-    headers,
-    body: JSON.stringify(credentials),
+    body: credentials,
   });
-  return handleResponse(response);
-};
 
-export const doctorRegister = async (payload: {
+// Matches what POST /api/doctor/register accepts. The previous type declared
+// `field` and `category` and omitted specialization/experience/education, so it
+// described an endpoint that does not exist.
+export type DoctorRegisterPayload = {
   fullName: string;
   email: string;
-  gender: string;
-  field: string;
-  category: string;
+  phone: string;
+  gender: Gender | "";
+  password: string;
+  specialization: string;
+  experience: number;
+  education: string[];
+  dateOfBirth?: string;
+  category?: string;
+  clinic?: Doctor["clinic"];
+  documents?: Doctor["documents"];
+};
+
+export const doctorRegister = (payload: DoctorRegisterPayload) =>
+  request<{ message: string }>(API_ENDPOINTS.doctor.register, {
+    method: "POST",
+    body: payload,
+  });
+
+// 🧑‍🦱 Patient
+export const patientLogin = (credentials: LoginCredentials) =>
+  request<PatientLoginResponse>(API_ENDPOINTS.patient.login, {
+    method: "POST",
+    body: credentials,
+  });
+
+export type PatientRegisterPayload = {
+  fullName: string;
+  email: string;
+  gender: Gender | "";
   password: string;
   phone: string;
   dateOfBirth?: string;
-}) => {
-  const response = await fetch(API_ENDPOINTS.doctor.register, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(response);
 };
 
-// 🧑‍🦱 Patient Auth
-export const patientLogin = async (credentials: {
-  email: string;
-  password: string;
-}) => {
-  const response = await fetch(API_ENDPOINTS.patient.login, {
+export const patientRegister = (payload: PatientRegisterPayload) =>
+  request<{ message: string }>(API_ENDPOINTS.patient.register, {
     method: "POST",
-    headers,
-    body: JSON.stringify(credentials),
+    body: payload,
   });
-  return handleResponse(response);
-};
-
-export const patientRegister = async (payload: {
-  fullName: string;
-  email: string;
-  gender: string;
-  password: string;
-  phone: string;
-  dateOfBirth?: string;
-}) => {
-  const response = await fetch(API_ENDPOINTS.patient.register, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(response);
-};
