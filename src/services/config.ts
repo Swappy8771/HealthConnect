@@ -18,10 +18,14 @@ export const API_ENDPOINTS = {
     healthform: `${BASE_URL}/patient/healthform`,
     doctorList: `${BASE_URL}/patient/doctors`,
     doctorsByCategory: `${BASE_URL}/patient/doctors-by-category`,
+    doctorSlots: (doctorId: string) => `${BASE_URL}/patient/doctors/${doctorId}/slots`,
+    appointments: `${BASE_URL}/patient/appointments`,
   },
   doctor: {
     login: `${BASE_URL}/doctor/login`,
     register: `${BASE_URL}/doctor/register`,
+    availability: `${BASE_URL}/doctor/availability`,
+    appointments: `${BASE_URL}/doctor/appointments`,
   },
   admin: {
     login: `${BASE_URL}/admin/login`,

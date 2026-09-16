@@ -70,3 +70,48 @@ export type Admin = {
   role: "super-admin" | "verification-admin" | "support-admin";
   status: "active" | "suspended";
 };
+
+// ---- Appointments ----
+
+export type AppointmentStatus = "booked" | "completed" | "cancelled" | "no-show";
+
+export type AvailabilityWindow = {
+  dayOfWeek: number;   // 0 = Sunday
+  startTime: string;   // "HH:MM", UTC
+  endTime: string;     // "HH:MM", UTC
+};
+
+export type DoctorAvailability = {
+  availability: AvailabilityWindow[];
+  slotMinutes: number;
+};
+
+export type Slot = {
+  startsAt: string;
+  endsAt: string;
+};
+
+export type SlotsResponse = {
+  doctor: string;
+  date: string;
+  slotMinutes?: number;
+  fee?: number;
+  slots: Slot[];
+};
+
+/** `doctor` and `patient` arrive populated on the list endpoints. */
+export type Appointment = {
+  _id: string;
+  patient: string | Pick<PatientProfile, "_id" | "fullName" | "phone" | "gender" | "dateOfBirth">;
+  doctor: string | Pick<Doctor, "_id" | "fullName" | "specialization" | "clinic">;
+  startsAt: string;
+  endsAt: string;
+  status: AppointmentStatus;
+  consultationType: "Online" | "Offline";
+  fee?: number;
+  reason?: string;
+  cancelledBy?: "patient" | "doctor" | "admin";
+  cancelledAt?: string;
+  cancellationReason?: string;
+  createdAt?: string;
+};
