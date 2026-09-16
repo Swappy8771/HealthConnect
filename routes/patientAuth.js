@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/Patient');
+const { JWT_SECRET } = require('../config/env');
 
 // POST /api/patient/signup
 router.post('/register', async (req, res) => {
@@ -51,7 +52,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { patientId: patient._id },
-      process.env.JWT_SECRET || 'your_jwt_secret',
+      JWT_SECRET,
       { expiresIn: '1d' }
     );
 

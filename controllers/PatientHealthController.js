@@ -1,5 +1,21 @@
 const Patient = require('../models/Patient');
 
+// The health fields, and only these, may be written through the health form.
+const HEALTH_FIELDS = [
+  'age',
+  'bloodGroup',
+  'emergencyContactName',
+  'emergencyContactPhone',
+  'medication',
+  'chronicDiseases',
+  'allergies',
+  'surgeries',
+  'smoking',
+  'alcohol',
+  'activityLevel',
+  'sleepHours',
+];
+
 const getHealthData = async (req, res) => {
   try {
     const patient = await Patient.findById(req.patient._id).select(
@@ -13,24 +29,14 @@ const getHealthData = async (req, res) => {
 
 const updateHealthData = async (req, res) => {
   try {
-    const healthFields = {
-      age,
-      bloodGroup,
-      emergencyContactName,
-      emergencyContactPhone,
-      medication,
-      chronicDiseases,
-      allergies,
-      surgeries,
-      smoking,
-      alcohol,
-      activityLevel,
-      sleepHours
-    } = req.body;
+    const healthFields = HEALTH_FIELDS.reduce((out, key) => {
+      if (req.body[key] !== undefined) out[key] = req.body[key];
+      return out;
+    }, {});
 
     const updated = await Patient.findByIdAndUpdate(
       req.patient._id,
-      { ...healthFields },
+      healthFields,
       { new: true, runValidators: true }
     ).select('-password');
 

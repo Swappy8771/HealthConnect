@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/env');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 const Admin = require('../models/Admin');
@@ -13,7 +14,7 @@ const extractToken = (req) => {
 // Utility: Verify token with secret and handle errors safely
 const verifyToken = (token) => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    return jwt.verify(token, JWT_SECRET);
   } catch (err) {
     return null;
   }

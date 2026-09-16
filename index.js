@@ -1,17 +1,15 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 
-// Load environment variables
-dotenv.config();
+// Loads and validates .env — exits if MONGO_URI or JWT_SECRET is missing
+const { PORT } = require('./config/env');
+const connectDB = require('./config/db');
 
 // Connect to DB
 connectDB();
 
 // Initialize app
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());

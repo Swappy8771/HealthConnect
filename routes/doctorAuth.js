@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/Doctor');
+const { JWT_SECRET } = require('../config/env');
 
 // Doctor Registration
 router.post('/register', async (req, res) => {
@@ -19,8 +20,21 @@ router.post('/register', async (req, res) => {
     documents
   } = req.body;
 
-  if (!fullName || !email || !gender || !password || !phone || !specialization || !experience || !education) {
-    return res.status(400).json({ message: 'Please provide all required fields.' });
+  // Note: a plain `!value` check would reject `experience: 0`, which is a valid
+  // value for a newly qualified doctor (the schema allows `min: 0`).
+  const isMissing = (value) =>
+    value === undefined ||
+    value === null ||
+    (typeof value === 'string' && value.trim() === '') ||
+    (Array.isArray(value) && value.length === 0);
+
+  const required = { fullName, email, gender, password, phone, specialization, experience, education };
+  const missing = Object.keys(required).filter((key) => isMissing(required[key]));
+
+  if (missing.length) {
+    return res.status(400).json({
+      message: `Please provide all required fields. Missing: ${missing.join(', ')}`,
+    });
   }
 
   try {
@@ -70,7 +84,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { doctorId: doctor._id, role: 'doctor' },
-      process.env.JWT_SECRET || 'your_jwt_secret',
+      JWT_SECRET,
       { expiresIn: '1d' }
     );
 
