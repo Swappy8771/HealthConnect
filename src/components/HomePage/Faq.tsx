@@ -28,7 +28,7 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="bg-gray-50 py-12 px-4 md:px-8 lg:px-20">
+    <section id="faq" className="bg-gray-50 py-12 px-4 md:px-8 lg:px-20">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
           Frequently Asked Questions

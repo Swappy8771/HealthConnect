@@ -10,7 +10,7 @@ const UserTypeModal: React.FC<Props> = ({ isOpen, onClose, onSelect }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 w-96 shadow-lg">
         <h2 className="text-xl font-semibold mb-4 text-center">Continue as:</h2>
         <div className="flex flex-col gap-4">

@@ -1,8 +1,9 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 // Layouts
-import PatientLayout from "./layouts/PatientLayot";
+import ProtectedRoute from "./components/shared/ProtectedRoute";
+import PatientLayout from "./layouts/PatientLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import DoctorLayout from "./layouts/DoctorLayout";
 
@@ -45,6 +46,7 @@ const App: React.FC = () => {
         <Route path="/doctor/register" element={<DoctorRegister />} />
 
         {/* Doctor Dashboard Routes */}
+        <Route element={<ProtectedRoute tokenKey="doctorToken" loginPath="/doctor/login" />}>
         <Route path="/doctor" element={<DoctorLayout />}>
          <Route path="dashboard" element={<DoctorHome />} />
         
@@ -54,25 +56,33 @@ const App: React.FC = () => {
           <Route path="profile" element={<DoctorProfile />} />
           <Route path="settings" element={<DoctorSettings />} /> */}
         </Route>
+        </Route>
 
         {/* Patient Auth */}
         <Route path="/patient/login" element={<PatientLogin />} />
         <Route path="/patient/register" element={<PatientRegister />} />
 
         {/* Patient Dashboard Routes */}
+        <Route element={<ProtectedRoute tokenKey="token" loginPath="/patient/login" />}>
         <Route path="/landing" element={<PatientLayout />}>
           <Route path="patientHome" element={<PatientHome />} />
           <Route path="patient/health-form" element={<HealthForm />} />
           <Route path="patient/profile" element={<PatientProfile />} />
           <Route path="patient/doctors" element={<DoctorsList />} />
         </Route>
+        </Route>
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="doctor-requests" element={<AdminDoctorApproval />} />
+        <Route element={<ProtectedRoute tokenKey="adminToken" loginPath="/admin/login" />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="doctor-requests" element={<AdminDoctorApproval />} />
+          </Route>
         </Route>
+
+        {/* Unknown URL: send people somewhere real instead of a blank page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

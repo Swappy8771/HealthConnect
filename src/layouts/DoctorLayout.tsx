@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -13,14 +13,9 @@ const DoctorLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("doctorToken");
-    if (!token) navigate("/doctor/login");
-  }, [navigate]);
-
   const handleLogout = () => {
     localStorage.removeItem("doctorToken");
-    navigate("/doctor/login");
+    navigate("/doctor/login", { replace: true });
   };
 
   return (

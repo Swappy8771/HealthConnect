@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { getHealthForm, updateHealthForm } from "../../services/patientService";
 
+// Only fields that GET /api/patient/healthform returns and PUT accepts.
+// fullName, gender and phone are account fields — they live on the profile
+// page. They used to appear here and only saved because of a mass-assignment
+// bug in the controller; they never loaded back.
 const defaultForm = {
-  fullName: "",
   age: "",
-  gender: "",
   bloodGroup: "",
-  phone: "",
   emergencyContactName: "",
   emergencyContactPhone: "",
   medication: "",
@@ -29,10 +30,17 @@ const HealthForm: React.FC = () => {
     const fetchData = async () => {
       try {
         const data = await getHealthForm();
-        setForm(data);
-        setOriginalForm(data);
+        // Keep only known fields, and never feed null/undefined into a
+        // controlled input (React would switch it to uncontrolled).
+        const loaded = { ...defaultForm };
+        (Object.keys(defaultForm) as (keyof typeof defaultForm)[]).forEach((key) => {
+          if (data?.[key] !== null && data?.[key] !== undefined) loaded[key] = data[key];
+        });
+        setForm(loaded);
+        setOriginalForm(loaded);
       } catch (err) {
         console.error("Error fetching form:", err);
+        alert(err instanceof Error ? err.message : "Could not load your health form");
       } finally {
         setLoading(false);
       }
@@ -59,7 +67,7 @@ const HealthForm: React.FC = () => {
       setOriginalForm(form);
       setEditMode(false);
     } catch (err) {
-      alert("Failed to update health form");
+      alert(err instanceof Error ? err.message : "Failed to update health form");
     }
   };
 
@@ -70,13 +78,8 @@ const HealthForm: React.FC = () => {
       <h2 className="text-2xl font-semibold mb-4 text-blue-600">Health Form</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input name="fullName" value={form.fullName} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Full Name" />
           <input name="age" type="number" value={form.age} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Age" />
-          <select name="gender" value={form.gender} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded">
-            <option value="">Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-          </select>
           <input name="bloodGroup" value={form.bloodGroup} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Blood Group" />
-          <input name="phone" value={form.phone} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Phone" />
           <input name="emergencyContactName" value={form.emergencyContactName} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Emergency Contact Name" />
           <input name="emergencyContactPhone" value={form.emergencyContactPhone} disabled={!editMode} onChange={handleChange} className="border px-4 py-2 rounded" placeholder="Emergency Contact Phone" />
         </div>

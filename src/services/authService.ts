@@ -25,16 +25,34 @@ export const doctorLogin = async (credentials: {
   return handleResponse(response);
 };
 
-export const doctorRegister = async (payload: {
+// Matches what POST /api/doctor/register actually accepts. The previous type
+// declared `field` and `category` and omitted specialization/experience/
+// education, so it described an endpoint that does not exist.
+export type DoctorRegisterPayload = {
   fullName: string;
   email: string;
-  gender: string;
-  field: string;
-  category: string;
-  password: string;
   phone: string;
+  gender: string;
+  password: string;
+  specialization: string;
+  experience: number;
+  education: string[];
   dateOfBirth?: string;
-}) => {
+  category?: string;
+  clinic?: {
+    name?: string;
+    address?: string;
+    consultationType?: string;
+    consultationFee?: number;
+  };
+  documents?: {
+    degrees?: string[];
+    license?: string;
+    idProof?: string;
+  };
+};
+
+export const doctorRegister = async (payload: DoctorRegisterPayload) => {
   const response = await fetch(API_ENDPOINTS.doctor.register, {
     method: "POST",
     headers,

@@ -24,7 +24,9 @@ const DoctorLogin: React.FC = () => {
         setError("Invalid email or password");
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Login failed");
+      // handleResponse throws a plain Error carrying the server's message —
+      // including "awaiting admin approval", which the doctor needs to see.
+      setError(err?.message || "Login failed");
     }
   };
 

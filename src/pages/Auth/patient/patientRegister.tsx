@@ -29,7 +29,7 @@ const PatientRegister: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const result = await patientRegister(form);
+      await patientRegister(form);
       alert("Registration successful!");
       navigate("/patient/login");
     } catch (error: any) {

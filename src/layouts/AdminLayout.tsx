@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -13,14 +13,9 @@ const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("adminToken");
-    if (!token) navigate("/admin/login");
-  }, [navigate]);
-
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
-    navigate("/admin/login");
+    navigate("/admin/login", { replace: true });
   };
 
   return (

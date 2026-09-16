@@ -62,27 +62,26 @@ export const deletePatientProfile = async () => {
 //Health Form
 
 export const getHealthForm = async () => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   const response = await fetch(API_ENDPOINTS.patient.healthform, {
     headers: {
-      "Content-Type": "application/json",
+      ...headers,
       Authorization: `Bearer ${token}`,
     },
   });
-  return await response.json();
+  return handleResponse(response);
 };
 
 // ✏️ Update health form
 export const updateHealthForm = async (formData: any) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   const response = await fetch(API_ENDPOINTS.patient.healthform, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
+      ...headers,
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(formData),
   });
-  if (!response.ok) throw new Error("Update failed");
-  return await response.json();
+  return handleResponse(response);
 };
